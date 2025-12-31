@@ -1,5 +1,7 @@
 # 🌟 STREE - Women Standing for Women
 
+**"Her For Hers"**
+
 ## About Stree
 
 Stree is a groundbreaking community concept dedicated to empowering women and ensuring their safety, pride, and organic growth. In a world where women face numerous challenges including domestic violence, assaults, and molestations, Stree represents a powerful movement where women stand united to support and protect one another.
@@ -14,6 +16,14 @@ Stree is a groundbreaking community concept dedicated to empowering women and en
 - **Community Strength**: Building a network of women who stand together in solidarity
 - **Organic Growth**: Fostering personal and collective development naturally and sustainably
 - **Pride & Dignity**: Ensuring every woman can live with honor, respect, and self-worth
+
+---
+
+## 💻 Tech Stack
+
+| Technology | Purpose |
+|------------|---------|
+| **React** | Frontend Development |
 
 ---
 
