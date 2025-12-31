@@ -88,17 +88,6 @@ Stree is more than just a community—it's a revolution. It's time for women to:
 ✅ Grow together organically  
 ✅ Create a world where women thrive  
 
-**Together, we are stronger. Together, we are Stree.**
-
 ---
-
-## 📞 Get Involved
-
-For more information about joining or supporting Stree, please reach out to us.
-
----
-
-*Stree: Women Standing for Women* 🏳️‍🌈
-
-*"Alone, we can do so little; together, we can do so much." - Helen Keller*
+© 2025 Stree. All rights reserved.
 
