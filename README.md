@@ -1,6 +1,5 @@
-# 🌟 STREE - Women Standing for Women
+# 🌟 STREE - Her for Hers
 
-**"Her For Hers"**
 
 ## About Stree
 
