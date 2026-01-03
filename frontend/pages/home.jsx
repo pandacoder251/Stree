@@ -127,8 +127,8 @@ const App = () => {
         <div className="flex-grow overflow-y-auto hide-scrollbar flex flex-col">
           
           <div className="px-6 mb-2 mt-2 shrink-0 text-center">
-            <h2 className="text-purple-400 text-sm font-medium italic">Welcome back, Priya</h2>
-            <p className="text-[10px] text-purple-300 font-sans uppercase tracking-widest mt-1">Peace in every step</p>
+            <h2 className="text-purple-400 text-sm font-medium italic">Welcome back</h2>
+            <p className="text-[10px] text-purple-300 font-sans uppercase tracking-widest mt-1">Stand for <Yourself></Yourself></p>
           </div>
 
           {/* SOS Section */}
