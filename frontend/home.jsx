@@ -1,259 +1,217 @@
-import React, { useState, useEffect } from 'react'
-import './src/index.css'
+import React, { useState, useEffect, useRef } from 'react';
+import { Phone, MapPin, Shield, Users, AlertTriangle, Heart, Battery, Signal, Wifi } from 'lucide-react';
 
-// Mock services for state management
-const useSOSService = () => {
-  const [sosActivated, setSosActivated] = useState(false)
-  const [tapCount, setTapCount] = useState(0)
+const App = () => {
+  const [tapCount, setTapCount] = useState(0);
+  const [sosActive, setSosActive] = useState(false);
+  const resetTimerRef = useRef(null);
+
+  // --- 3-Tap Logic ---
+  const handleTap = () => {
+    if (resetTimerRef.current) {
+      clearTimeout(resetTimerRef.current);
+    }
+
+    const newCount = tapCount + 1;
+    setTapCount(newCount);
+
+    if (newCount >= 3) {
+      triggerEmergency();
+      setTapCount(0); 
+      return;
+    }
+
+    resetTimerRef.current = setTimeout(() => {
+      setTapCount(0);
+    }, 800);
+  };
+
+  const triggerEmergency = () => {
+    setSosActive(true);
+    setTimeout(() => {
+      alert("EMERGENCY TRIGGERED: Calling 100...");
+      setSosActive(false);
+    }, 500);
+  };
 
   useEffect(() => {
-    let timeout
-    if (tapCount > 0 && !sosActivated) {
-      timeout = setTimeout(() => setTapCount(0), 2000)
-    }
-    return () => clearTimeout(timeout)
-  }, [tapCount, sosActivated])
+    return () => {
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    };
+  }, []);
 
-  const handleTap = () => {
-    if (sosActivated) return
-    const newCount = tapCount + 1
-    setTapCount(newCount)
-    if (newCount >= 3) {
-      setSosActivated(true)
-      setTapCount(0)
-      console.log('SOS Activated!')
-    }
-  }
-
-  const deactivateSOS = () => {
-    setSosActivated(false)
-    setTapCount(0)
-  }
-
-  return { sosActivated, tapCount, handleTap, deactivateSOS }
-}
-
-const useLocationService = () => {
-  return {
-    getCurrentLocation: () => {
-      console.log('Getting current location...')
-      return { latitude: 0, longitude: 0 }
-    }
-  }
-}
-
-// Icons as inline SVG components
-const Icons = {
-  emergency: () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" width="64" height="64">
-      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-    </svg>
-  ),
-  warning: () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" width="64" height="64">
-      <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
-    </svg>
-  ),
-  location_on: () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40">
-      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-    </svg>
-  ),
-  contacts: () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40">
-      <path d="M20 0H4v2h16V0zm-2 19c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2v-1h18v1zm-2-3H6v-1h10v1zm0-2H6V7h12v7z"/>
-    </svg>
-  ),
-  people: () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40">
-      <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-    </svg>
-  ),
-  health_and_safety: () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40">
-      <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1.06 13.54L7.4 12l1.41-1.41 2.12 2.12 4.24-4.24 1.41 1.41-5.64 5.66z"/>
-    </svg>
-  ),
-  home: () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-    </svg>
-  ),
-  lightbulb: () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-      <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/>
-    </svg>
-  )
-}
-
-// SOS Button Component
-const SOSButton = ({ sosService }) => {
-  const { sosActivated, tapCount, handleTap, deactivateSOS } = sosService
-
-  const getGradient = () => {
-    if (sosActivated) {
-      return 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)'
-    }
-    return 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)'
-  }
+  const features = [
+    { 
+      title: "Emergency Contacts", 
+      icon: <Phone className="w-6 h-6 text-emerald-700" />, 
+      bg: "bg-emerald-50",
+      desc: "Trusted circle"
+    },
+    { 
+      title: "Location Tracker", 
+      icon: <MapPin className="w-6 h-6 text-indigo-600" />, 
+      bg: "bg-indigo-50",
+      desc: "Share live GPS"
+    },
+    { 
+      title: "Safety Tips", 
+      icon: <Shield className="w-6 h-6 text-teal-700" />, 
+      bg: "bg-teal-50",
+      desc: "Guides & Laws"
+    },
+    { 
+      title: "Community", 
+      icon: <Users className="w-6 h-6 text-stone-600" />, 
+      bg: "bg-stone-100",
+      desc: "Forums & Support"
+    },
+  ];
 
   return (
-    <div className="sos-button" onClick={handleTap} style={{ background: getGradient() }}>
-      <div className="sos-content">
-        {sosActivated ? <Icons.emergency /> : <Icons.warning />}
-        <p className="sos-title">{sosActivated ? 'SOS ACTIVATED' : 'EMERGENCY SOS'}</p>
-        <p className="sos-subtitle">
-          {sosActivated ? 'Emergency services alerted' : 'Tap 3 times quickly to activate'}
-        </p>
+    <div className="min-h-screen bg-stone-200 flex items-center justify-center p-4">
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+          .font-libre { font-family: 'Libre Baskerville', serif; }
+          .hide-scrollbar::-webkit-scrollbar { display: none; }
+          .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          @keyframes ripple {
+            0% { transform: scale(1); opacity: 0.4; }
+            100% { transform: scale(1.5); opacity: 0; }
+          }
+          .animate-ripple {
+            animation: ripple 2s infinite;
+          }
+        `}
+      </style>
 
-        {tapCount > 0 && !sosActivated && (
-          <div className="tap-indicators">
-            {[0, 1, 2].map((index) => (
-              <span
-                key={index}
-                className={`tap-dot ${index < tapCount ? 'active' : ''}`}
-              />
-            ))}
+      {/* Mobile Device Container */}
+      <div className="w-full max-w-sm bg-[#FCFAF7] rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-stone-800 relative h-[800px] flex flex-col font-libre">
+        
+        {/* Status Bar Mockup */}
+        <div className="bg-stone-800 text-stone-100 px-6 py-3 flex justify-between items-center text-xs font-sans shrink-0">
+          <span className="font-medium">9:41</span>
+          <div className="flex gap-2 text-stone-400">
+            <Signal size={14} />
+            <Wifi size={14} />
+            <Battery size={14} />
           </div>
-        )}
-
-        {sosActivated && (
-          <button className="cancel-sos-button" onClick={(e) => { e.stopPropagation(); deactivateSOS() }}>
-            Cancel SOS
-          </button>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// Quick Access Card Component
-const QuickAccessCard = ({ icon, title, subtitle, color, onTap }) => {
-  const IconComponent = Icons[icon] || Icons.location_on
-
-  return (
-    <div className="quick-access-card" onClick={onTap}>
-      <div className="card-icon" style={{ color }}>
-        <IconComponent />
-      </div>
-      <p className="card-title">{title}</p>
-      <p className="card-subtitle">{subtitle}</p>
-    </div>
-  )
-}
-
-// Quick Access Grid Component
-const QuickAccessGrid = () => {
-  const cards = [
-    { icon: 'location_on', title: 'Location Share', subtitle: 'Share live location', color: '#7c3aed', onTap: () => console.log('Navigate to location') },
-    { icon: 'contacts', title: 'Contacts', subtitle: 'Emergency numbers', color: '#8b5cf6', onTap: () => console.log('Navigate to contacts') },
-    { icon: 'people', title: 'Community', subtitle: 'Support groups', color: '#a78bfa', onTap: () => console.log('Navigate to community') },
-    { icon: 'health_and_safety', title: 'Safety Tips', subtitle: 'Stay informed', color: '#7c3aed', onTap: () => console.log('Navigate to safety tips') }
-  ]
-
-  return (
-    <div className="quick-access-grid">
-      {cards.map((card, index) => (
-        <QuickAccessCard key={index} {...card} />
-      ))}
-    </div>
-  )
-}
-
-// Safety Tips Card Component
-const SafetyTipsCard = () => {
-  const tips = [
-    'Always share your location with trusted contacts',
-    'Keep emergency contacts easily accessible',
-    'Trust your instincts and stay aware'
-  ]
-
-  return (
-    <div className="safety-tips-card">
-      <div className="safety-header">
-        <Icons.lightbulb />
-        <h3>Safety Tips</h3>
-      </div>
-      <div className="tips-list">
-        {tips.map((tip, index) => (
-          <div key={index} className="tip-item">
-            <span className="bullet">•</span>
-            <p>{tip}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// Bottom Navigation Component
-const AppBottomNav = ({ currentIndex }) => {
-  const navItems = [
-    { icon: 'home', label: 'Home' },
-    { icon: 'location_on', label: 'Location' },
-    { icon: 'contacts', label: 'Contacts' },
-    { icon: 'people', label: 'Community' }
-  ]
-
-  const handleNav = (index) => {
-    console.log(`Navigate to tab: ${index}`)
-  }
-
-  return (
-    <nav className="bottom-nav">
-      {navItems.map((item, index) => {
-        const IconComponent = Icons[item.icon] || Icons.home
-        return (
-          <button
-            key={index}
-            className={`nav-item ${index === currentIndex ? 'active' : ''}`}
-            onClick={() => handleNav(index)}
-          >
-            <IconComponent />
-            <span>{item.label}</span>
-          </button>
-        )
-      })}
-    </nav>
-  )
-}
-
-// Main Home Page Component
-const StreeHome = () => {
-  const sosService = useSOSService()
-  const locationService = useLocationService()
-
-  return (
-    <div className="stree-home">
-      <main className="home-main">
-        <div className="home-content">
-          <div className="home-header">
-            <h1 className="app-title">Stree</h1>
-            <p className="app-subtitle">Her for Hers</p>
-          </div>
-
-          <div className="home-spacing-lg" />
-
-          <SOSButton sosService={sosService} />
-
-          <div className="home-spacing-xxl" />
-
-          <h2 className="section-title">Quick Access</h2>
-
-          <div className="home-spacing-md" />
-
-          <QuickAccessGrid />
-
-          <div className="home-spacing-xxl" />
-
-          <SafetyTipsCard />
         </div>
-      </main>
 
-      <AppBottomNav currentIndex={0} />
+        {/* Simplified App Header (No Hamburger/Bell) */}
+        <header className="px-6 pt-8 pb-4 flex flex-col items-center shrink-0">
+          <h1 className="text-3xl font-black tracking-tighter text-stone-800">
+            STREE
+          </h1>
+          <p className="text-[0.7rem] text-emerald-700 font-bold tracking-[0.3em] uppercase mt-1">
+            Her For Hers
+          </p>
+        </header>
+
+        {/* Main Content Area */}
+        <div className="flex-grow overflow-y-auto hide-scrollbar flex flex-col">
+          
+          {/* Welcome Message */}
+          <div className="px-6 mb-2 mt-2 shrink-0 text-center">
+            <h2 className="text-stone-500 text-sm font-medium italic">Welcome, Priya</h2>
+            <p className="text-[10px] text-stone-400 font-sans uppercase tracking-widest mt-1">Stand strong, stay safe</p>
+          </div>
+
+          {/* SOS Section - Re-centered and Enhanced */}
+          <div className="flex-grow flex flex-col items-center justify-center relative min-h-[350px] shrink-0">
+            
+            {/* Visual Feedback Background */}
+            <div className={`absolute inset-0 transition-colors duration-700 ${tapCount > 0 ? 'bg-emerald-500/10' : 'bg-transparent'}`}></div>
+
+            <div className="relative z-20">
+              {/* Static Therapeutic Ripples */}
+              <div className="absolute inset-0 rounded-full bg-emerald-100 animate-ripple"></div>
+              <div className="absolute inset-0 rounded-full bg-emerald-200 animate-ripple" style={{animationDelay: '1s'}}></div>
+
+              {/* The Button */}
+              <button
+                onClick={handleTap}
+                className={`
+                  relative w-56 h-56 rounded-full flex flex-col items-center justify-center 
+                  shadow-[0_20px_50px_rgba(6,78,59,0.2)] transition-all duration-300
+                  ${tapCount > 0 
+                    ? 'bg-gradient-to-br from-emerald-800 to-emerald-950 scale-90 border-4 border-emerald-300 shadow-inner' 
+                    : 'bg-gradient-to-br from-emerald-700 to-emerald-800 hover:scale-105 border-4 border-emerald-100'
+                  }
+                  ${sosActive ? 'bg-emerald-950 scale-75' : ''}
+                `}
+              >
+                <div className="bg-white/10 p-5 rounded-full mb-2 backdrop-blur-md">
+                  <AlertTriangle className="w-12 h-12 text-emerald-50 fill-current opacity-90" />
+                </div>
+                <span className="text-5xl font-black text-white tracking-widest drop-shadow-lg">SOS</span>
+                <div className="mt-2 flex gap-1.5">
+                  {[1, 2, 3].map((dot) => (
+                    <div 
+                      key={dot} 
+                      className={`h-1.5 rounded-full transition-all duration-300 ${tapCount >= dot ? 'bg-white w-4' : 'bg-white/30 w-1.5'}`}
+                    />
+                  ))}
+                </div>
+              </button>
+            </div>
+            
+            <div className="mt-10 text-center px-8">
+              <p className={`text-xs font-bold font-sans transition-all duration-300 tracking-wide uppercase ${tapCount > 0 ? 'text-emerald-700' : 'text-stone-400'}`}>
+                {tapCount === 0 
+                  ? "Tap 3 times in danger" 
+                  : `Quickly! ${3 - tapCount} more taps`
+                }
+              </p>
+              <p className="mt-2 text-[10px] text-stone-400 italic font-sans">
+                This will alert authorities and your trusted circle.
+              </p>
+            </div>
+          </div>
+
+          {/* Feature Grid */}
+          <section className="bg-white rounded-t-[3rem] shadow-[0_-15px_50px_rgba(28,25,23,0.06)] p-8 mt-auto shrink-0 border-t border-stone-100">
+            <div className="w-12 h-1.5 bg-stone-100 rounded-full mx-auto mb-8"></div>
+            
+            <div className="grid grid-cols-2 gap-5">
+              {features.map((item, index) => (
+                <div 
+                  key={index}
+                  className={`${item.bg} p-5 rounded-[2rem] flex flex-col justify-between h-32 active:scale-95 transition-all duration-200 cursor-pointer group hover:shadow-lg border border-transparent hover:border-emerald-100`}
+                >
+                  <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-stone-800 font-bold text-[13px] leading-tight mb-1">
+                      {item.title}
+                    </h3>
+                    <p className="text-[10px] text-stone-500 font-medium font-sans uppercase tracking-tight">
+                      {item.desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {/* Bottom Navigation Bar */}
+        <footer className="bg-white px-10 py-5 flex justify-between items-center border-t border-stone-50 shrink-0">
+          <div className="flex flex-col items-center text-emerald-700">
+            <Heart className="w-6 h-6 fill-current" />
+          </div>
+          <div className="flex flex-col items-center text-stone-300">
+            <Users className="w-6 h-6" />
+          </div>
+          <div className="flex flex-col items-center text-stone-300">
+            <Shield className="w-6 h-6" />
+          </div>
+        </footer>
+
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default StreeHome
-
+export default App;
