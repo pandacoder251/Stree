@@ -88,5 +88,52 @@ Stree is more than just a community—it's a revolution. It's time for women to:
 ✅ Create a world where women thrive  
 
 ---
+
+---
+
+## 🚀 Getting Started
+
+### Installation
+
+1. **Install dependencies:**
+	```bash
+	cd frontend
+	npm install
+	```
+
+### Development Server
+
+To start the development server and host the frontend locally:
+
+```bash
+cd frontend
+npm start
+```
+
+This will start the app at [http://localhost:8080](http://localhost:8080) by default.
+
+### Build for Production
+
+To build the frontend bundle:
+
+```bash
+cd frontend
+npm run build
+```
+
+### Commit & Sync
+
+1. **Commit your changes:**
+	```bash
+	git add .
+	git commit -m "Your commit message"
+	```
+2. **Sync with remote:**
+	```bash
+	git push origin main
+	```
+
+---
+
 © 2025 Stree. All rights reserved.
 
