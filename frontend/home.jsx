@@ -1,511 +1,259 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
+import './src/index.css'
 
-const StreeHome = () => {
-  const [sosTapCount, setSosTapCount] = useState(0);
-  const [sosActive, setSosActive] = useState(false);
-  const [countdown, setCountdown] = useState(3);
-  const [activeSection, setActiveSection] = useState('');
+// Mock services for state management
+const useSOSService = () => {
+  const [sosActivated, setSosActivated] = useState(false)
+  const [tapCount, setTapCount] = useState(0)
 
-  // Handle SOS tap logic
-  const handleSosTap = () => {
-    if (sosActive) return;
-    
-    setSosTapCount(prev => prev + 1);
-    setCountdown(3);
-  };
-
-  // Countdown timer for SOS activation
   useEffect(() => {
-    if (sosTapCount > 0 && sosTapCount < 3) {
-      const timer = setInterval(() => {
-        setCountdown(prev => {
-          if (prev <= 1) {
-            setSosTapCount(0);
-            return 3;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(timer);
+    let timeout
+    if (tapCount > 0 && !sosActivated) {
+      timeout = setTimeout(() => setTapCount(0), 2000)
     }
-  }, [sosTapCount]);
+    return () => clearTimeout(timeout)
+  }, [tapCount, sosActivated])
 
-  // Activate SOS when 3 taps are completed
-  useEffect(() => {
-    if (sosTapCount >= 3) {
-      setSosActive(true);
-      // Trigger emergency call
-      window.location.href = 'tel:100';
+  const handleTap = () => {
+    if (sosActivated) return
+    const newCount = tapCount + 1
+    setTapCount(newCount)
+    if (newCount >= 3) {
+      setSosActivated(true)
+      setTapCount(0)
+      console.log('SOS Activated!')
     }
-  }, [sosTapCount]);
+  }
 
-  // Reset SOS state
-  const resetSos = () => {
-    setSosTapCount(0);
-    setSosActive(false);
-    setCountdown(3);
-  };
+  const deactivateSOS = () => {
+    setSosActivated(false)
+    setTapCount(0)
+  }
 
-  // Smooth scroll to section
-  const scrollToSection = (sectionId) => {
-    setActiveSection(sectionId);
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+  return { sosActivated, tapCount, handleTap, deactivateSOS }
+}
+
+const useLocationService = () => {
+  return {
+    getCurrentLocation: () => {
+      console.log('Getting current location...')
+      return { latitude: 0, longitude: 0 }
     }
-    setTimeout(() => setActiveSection(''), 2000);
-  };
+  }
+}
+
+// Icons as inline SVG components
+const Icons = {
+  emergency: () => (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="64" height="64">
+      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+    </svg>
+  ),
+  warning: () => (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="64" height="64">
+      <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+    </svg>
+  ),
+  location_on: () => (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+    </svg>
+  ),
+  contacts: () => (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40">
+      <path d="M20 0H4v2h16V0zm-2 19c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2v-1h18v1zm-2-3H6v-1h10v1zm0-2H6V7h12v7z"/>
+    </svg>
+  ),
+  people: () => (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40">
+      <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+    </svg>
+  ),
+  health_and_safety: () => (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40">
+      <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1.06 13.54L7.4 12l1.41-1.41 2.12 2.12 4.24-4.24 1.41 1.41-5.64 5.66z"/>
+    </svg>
+  ),
+  home: () => (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+    </svg>
+  ),
+  lightbulb: () => (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+      <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/>
+    </svg>
+  )
+}
+
+// SOS Button Component
+const SOSButton = ({ sosService }) => {
+  const { sosActivated, tapCount, handleTap, deactivateSOS } = sosService
+
+  const getGradient = () => {
+    if (sosActivated) {
+      return 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)'
+    }
+    return 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)'
+  }
 
   return (
-    <div style={styles.container}>
-      {/* Header Navigation */}
-      <header style={styles.header}>
-        <nav style={styles.nav}>
-          <div style={styles.logoContainer}>
-            <h1 style={styles.logo}>STREE</h1>
-            <p style={styles.tagline}>Her for Hers</p>
-          </div>
-          
-          <div style={styles.navLinks}>
-            <a 
-              href="#location-tracker" 
-              style={styles.navLink}
-              onClick={(e) => { e.preventDefault(); scrollToSection('location-tracker'); }}
-            >
-              Location Tracker
-            </a>
-            <a 
-              href="#emergency-tracker" 
-              style={styles.navLink}
-              onClick={(e) => { e.preventDefault(); scrollToSection('emergency-tracker'); }}
-            >
-              Emergency Tracker
-            </a>
-            <a 
-              href="#safety-tips" 
-              style={styles.navLink}
-              onClick={(e) => { e.preventDefault(); scrollToSection('safety-tips'); }}
-            >
-              Safety Tips
-            </a>
-            <a 
-              href="#community" 
-              style={styles.navLink}
-              onClick={(e) => { e.preventDefault(); scrollToSection('community'); }}
-            >
-              Community
-            </a>
-          </div>
-        </nav>
-      </header>
+    <div className="sos-button" onClick={handleTap} style={{ background: getGradient() }}>
+      <div className="sos-content">
+        {sosActivated ? <Icons.emergency /> : <Icons.warning />}
+        <p className="sos-title">{sosActivated ? 'SOS ACTIVATED' : 'EMERGENCY SOS'}</p>
+        <p className="sos-subtitle">
+          {sosActivated ? 'Emergency services alerted' : 'Tap 3 times quickly to activate'}
+        </p>
 
-      {/* SOS Emergency Section */}
-      <div 
-        style={{
-          ...styles.sosContainer,
-          background: sosActive ? 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)' : 
-                      'linear-gradient(135deg, #6f42c1 0%, #5a3d8c 100%)'
-        }}
-      >
-        <div style={styles.sosContent}>
-          <h2 style={styles.sosTitle}>
-            {sosActive ? '🚨 EMERGENCY CALLING 100...' : '🆘 SOS Emergency'}
-          </h2>
-          <p style={styles.sosInstruction}>
-            {sosActive 
-              ? 'Stay calm. Help is on the way.' 
-              : `Tap the button 3 times within ${countdown} seconds to call emergency services`
-            }
-          </p>
-          
-          <div style={styles.sosButtonWrapper}>
-            <button 
-              onClick={handleSosTap}
-              disabled={sosActive}
-              style={{
-                ...styles.sosButton,
-                background: sosActive ? '#fff' : 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                boxShadow: sosActive 
-                  ? '0 0 50px rgba(255,255,255,0.5)' 
-                  : '0 10px 40px rgba(139, 92, 246, 0.4)',
-                animation: sosActive ? 'pulse 0.5s infinite' : 'none'
-              }}
-            >
-              {sosActive ? '📞 CALLING...' : 'SOS'}
-            </button>
-            {sosTapCount > 0 && sosTapCount < 3 && !sosActive && (
-              <div style={styles.tapCounter}>
-                {sosTapCount}/3 Taps
-              </div>
-            )}
+        {tapCount > 0 && !sosActivated && (
+          <div className="tap-indicators">
+            {[0, 1, 2].map((index) => (
+              <span
+                key={index}
+                className={`tap-dot ${index < tapCount ? 'active' : ''}`}
+              />
+            ))}
           </div>
-          
-          {sosActive && (
-            <button onClick={resetSos} style={styles.cancelButton}>
-              Cancel Call
-            </button>
-          )}
-        </div>
+        )}
+
+        {sosActivated && (
+          <button className="cancel-sos-button" onClick={(e) => { e.stopPropagation(); deactivateSOS() }}>
+            Cancel SOS
+          </button>
+        )}
       </div>
+    </div>
+  )
+}
 
-      {/* Content Sections */}
-      <main style={styles.main}>
-        
-        {/* Location Tracker Section */}
-        <section id="location-tracker" style={styles.section}>
-          <div style={styles.sectionIcon}>📍</div>
-          <h2 style={styles.sectionTitle}>Location Tracker</h2>
-          <p style={styles.sectionDescription}>
-            Share your real-time location with trusted contacts. 
-            Let your loved ones know you're safe wherever you go.
-          </p>
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Features</h3>
-            <ul style={styles.featureList}>
-              <li>Real-time GPS tracking</li>
-              <li>Share location with emergency contacts</li>
-              <li>Location history for safety records</li>
-              <li>Geofencing alerts</li>
-            </ul>
+// Quick Access Card Component
+const QuickAccessCard = ({ icon, title, subtitle, color, onTap }) => {
+  const IconComponent = Icons[icon] || Icons.location_on
+
+  return (
+    <div className="quick-access-card" onClick={onTap}>
+      <div className="card-icon" style={{ color }}>
+        <IconComponent />
+      </div>
+      <p className="card-title">{title}</p>
+      <p className="card-subtitle">{subtitle}</p>
+    </div>
+  )
+}
+
+// Quick Access Grid Component
+const QuickAccessGrid = () => {
+  const cards = [
+    { icon: 'location_on', title: 'Location Share', subtitle: 'Share live location', color: '#7c3aed', onTap: () => console.log('Navigate to location') },
+    { icon: 'contacts', title: 'Contacts', subtitle: 'Emergency numbers', color: '#8b5cf6', onTap: () => console.log('Navigate to contacts') },
+    { icon: 'people', title: 'Community', subtitle: 'Support groups', color: '#a78bfa', onTap: () => console.log('Navigate to community') },
+    { icon: 'health_and_safety', title: 'Safety Tips', subtitle: 'Stay informed', color: '#7c3aed', onTap: () => console.log('Navigate to safety tips') }
+  ]
+
+  return (
+    <div className="quick-access-grid">
+      {cards.map((card, index) => (
+        <QuickAccessCard key={index} {...card} />
+      ))}
+    </div>
+  )
+}
+
+// Safety Tips Card Component
+const SafetyTipsCard = () => {
+  const tips = [
+    'Always share your location with trusted contacts',
+    'Keep emergency contacts easily accessible',
+    'Trust your instincts and stay aware'
+  ]
+
+  return (
+    <div className="safety-tips-card">
+      <div className="safety-header">
+        <Icons.lightbulb />
+        <h3>Safety Tips</h3>
+      </div>
+      <div className="tips-list">
+        {tips.map((tip, index) => (
+          <div key={index} className="tip-item">
+            <span className="bullet">•</span>
+            <p>{tip}</p>
           </div>
-        </section>
+        ))}
+      </div>
+    </div>
+  )
+}
 
-        {/* Emergency Tracker Section */}
-        <section id="emergency-tracker" style={styles.section}>
-          <div style={styles.sectionIcon}>⚡</div>
-          <h2 style={styles.sectionTitle}>Emergency Tracker</h2>
-          <p style={styles.sectionDescription}>
-            Instant emergency alerts and tracking. Get help immediately 
-            when you need it most.
-          </p>
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Emergency Features</h3>
-            <ul style={styles.featureList}>
-              <li>One-tap emergency alerts</li>
-              <li>Automatic location sharing with authorities</li>
-              <li>Audio/video evidence recording</li>
-              <li>Instant notification to registered contacts</li>
-            </ul>
+// Bottom Navigation Component
+const AppBottomNav = ({ currentIndex }) => {
+  const navItems = [
+    { icon: 'home', label: 'Home' },
+    { icon: 'location_on', label: 'Location' },
+    { icon: 'contacts', label: 'Contacts' },
+    { icon: 'people', label: 'Community' }
+  ]
+
+  const handleNav = (index) => {
+    console.log(`Navigate to tab: ${index}`)
+  }
+
+  return (
+    <nav className="bottom-nav">
+      {navItems.map((item, index) => {
+        const IconComponent = Icons[item.icon] || Icons.home
+        return (
+          <button
+            key={index}
+            className={`nav-item ${index === currentIndex ? 'active' : ''}`}
+            onClick={() => handleNav(index)}
+          >
+            <IconComponent />
+            <span>{item.label}</span>
+          </button>
+        )
+      })}
+    </nav>
+  )
+}
+
+// Main Home Page Component
+const StreeHome = () => {
+  const sosService = useSOSService()
+  const locationService = useLocationService()
+
+  return (
+    <div className="stree-home">
+      <main className="home-main">
+        <div className="home-content">
+          <div className="home-header">
+            <h1 className="app-title">Stree</h1>
+            <p className="app-subtitle">Her for Hers</p>
           </div>
-        </section>
 
-        {/* Safety Tips Section */}
-        <section id="safety-tips" style={styles.section}>
-          <div style={styles.sectionIcon}>🛡️</div>
-          <h2 style={styles.sectionTitle}>Safety Tips</h2>
-          <p style={styles.sectionDescription}>
-            Empower yourself with practical safety tips and self-defense 
-            techniques for everyday situations.
-          </p>
-          <div style={styles.tipsGrid}>
-            <div style={styles.tipCard}>
-              <span style={styles.tipIcon}>🏠</span>
-              <h4>At Home</h4>
-              <p>Security measures and safety protocols for your residence</p>
-            </div>
-            <div style={styles.tipCard}>
-              <span style={styles.tipIcon}>🚗</span>
-              <h4>While Traveling</h4>
-              <p>Safety tips for commutes and long-distance travel</p>
-            </div>
-            <div style={styles.tipCard}>
-              <span style={styles.tipIcon}>💼</span>
-              <h4>At Workplace</h4>
-              <p>Professional safety and harassment prevention</p>
-            </div>
-            <div style={styles.tipCard}>
-              <span style={styles.tipIcon}>🎉</span>
-              <h4>Social Events</h4>
-              <p>Stay safe during social gatherings and outings</p>
-            </div>
-          </div>
-        </section>
+          <div className="home-spacing-lg" />
 
-        {/* Community Section */}
-        <section id="community" style={styles.section}>
-          <div style={styles.sectionIcon}>🤝</div>
-          <h2 style={styles.sectionTitle}>Community</h2>
-          <p style={styles.sectionDescription}>
-            Join a supportive community of women who stand together 
-            for safety, empowerment, and growth.
-          </p>
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Community Benefits</h3>
-            <ul style={styles.featureList}>
-              <li>Connect with women in your locality</li>
-              <li>Share experiences and support each other</li>
-              <li>Participate in safety workshops</li>
-              <li>Access mentorship programs</li>
-              <li>Build lasting friendships and networks</li>
-            </ul>
-          </div>
-        </section>
+          <SOSButton sosService={sosService} />
 
+          <div className="home-spacing-xxl" />
+
+          <h2 className="section-title">Quick Access</h2>
+
+          <div className="home-spacing-md" />
+
+          <QuickAccessGrid />
+
+          <div className="home-spacing-xxl" />
+
+          <SafetyTipsCard />
+        </div>
       </main>
 
-      {/* Footer */}
-      <footer style={styles.footer}>
-        <p style={styles.footerText}>
-          © 2025 Stree - Her for Hers. Together we are stronger.
-        </p>
-        <div style={styles.emergencyNumbers}>
-          <p style={styles.emergencyText}>Emergency: 100 (Police) | Women Helpline: 1091</p>
-        </div>
-      </footer>
-
-      {/* CSS Animation */}
-      <style>{`
-        @keyframes pulse {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-          100% { transform: scale(1); }
-        }
-        
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-        
-        body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-      `}</style>
+      <AppBottomNav currentIndex={0} />
     </div>
-  );
-};
+  )
+}
 
-// Comprehensive CSS-in-JS styles
-const styles = {
-  container: {
-    minHeight: '100vh',
-    background: 'linear-gradient(180deg, #faf5ff 0%, #f3e8ff 100%)',
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-  },
-  
-  header: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    background: 'linear-gradient(135deg, #6f42c1 0%, #5a3d8c 100%)',
-    padding: '1rem 2rem',
-    zIndex: 1000,
-    boxShadow: '0 4px 20px rgba(111, 66, 193, 0.3)',
-  },
-  
-  nav: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    maxWidth: '1400px',
-    margin: '0 auto',
-    flexWrap: 'wrap',
-    gap: '1rem',
-  },
-  
-  logoContainer: {
-    textAlign: 'center',
-  },
-  
-  logo: {
-    fontSize: '2.5rem',
-    fontWeight: '800',
-    color: '#ffffff',
-    margin: '0',
-    letterSpacing: '4px',
-    textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
-  },
-  
-  tagline: {
-    fontSize: '0.9rem',
-    color: '#e9d8fd',
-    margin: '0',
-    fontWeight: '500',
-    letterSpacing: '2px',
-  },
-  
-  navLinks: {
-    display: 'flex',
-    gap: '1.5rem',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-  },
-  
-  navLink: {
-    color: '#ffffff',
-    textDecoration: 'none',
-    fontSize: '1rem',
-    fontWeight: '500',
-    padding: '0.5rem 1rem',
-    borderRadius: '25px',
-    transition: 'all 0.3s ease',
-    background: 'rgba(255,255,255,0.1)',
-  },
-  
-  sosContainer: {
-    marginTop: '80px',
-    padding: '4rem 2rem',
-    textAlign: 'center',
-    color: '#ffffff',
-    transition: 'all 0.5s ease',
-  },
-  
-  sosContent: {
-    maxWidth: '800px',
-    margin: '0 auto',
-  },
-  
-  sosTitle: {
-    fontSize: '2.5rem',
-    marginBottom: '1rem',
-    fontWeight: '700',
-  },
-  
-  sosInstruction: {
-    fontSize: '1.2rem',
-    marginBottom: '2rem',
-    opacity: 0.9,
-  },
-  
-  sosButtonWrapper: {
-    position: 'relative',
-    display: 'inline-block',
-  },
-  
-  sosButton: {
-    width: '180px',
-    height: '180px',
-    borderRadius: '50%',
-    border: 'none',
-    fontSize: '2rem',
-    fontWeight: '800',
-    color: '#ffffff',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    letterSpacing: '4px',
-  },
-  
-  tapCounter: {
-    marginTop: '1rem',
-    fontSize: '1.2rem',
-    fontWeight: '600',
-    color: '#ffffff',
-    animation: 'pulse 0.5s infinite',
-  },
-  
-  cancelButton: {
-    marginTop: '2rem',
-    padding: '1rem 3rem',
-    fontSize: '1rem',
-    fontWeight: '600',
-    color: '#dc3545',
-    background: '#ffffff',
-    border: 'none',
-    borderRadius: '50px',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-  },
-  
-  main: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '3rem 2rem',
-  },
-  
-  section: {
-    padding: '4rem 2rem',
-    marginBottom: '2rem',
-    background: '#ffffff',
-    borderRadius: '20px',
-    boxShadow: '0 10px 40px rgba(111, 66, 193, 0.1)',
-    border: '1px solid #e9d8fd',
-    scrollMarginTop: '100px',
-  },
-  
-  sectionIcon: {
-    fontSize: '3rem',
-    marginBottom: '1rem',
-  },
-  
-  sectionTitle: {
-    fontSize: '2rem',
-    color: '#6f42c1',
-    marginBottom: '1rem',
-    fontWeight: '700',
-  },
-  
-  sectionDescription: {
-    fontSize: '1.1rem',
-    color: '#4a4a4a',
-    marginBottom: '2rem',
-    lineHeight: '1.8',
-  },
-  
-  card: {
-    background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
-    padding: '2rem',
-    borderRadius: '15px',
-    border: '1px solid #e9d8fd',
-  },
-  
-  cardTitle: {
-    fontSize: '1.3rem',
-    color: '#6f42c1',
-    marginBottom: '1rem',
-    fontWeight: '600',
-  },
-  
-  featureList: {
-    listStyle: 'none',
-    padding: 0,
-    margin: 0,
-  },
-  
-  tipsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '1.5rem',
-    marginTop: '2rem',
-  },
-  
-  tipCard: {
-    background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
-    padding: '1.5rem',
-    borderRadius: '15px',
-    border: '1px solid #e9d8fd',
-    textAlign: 'center',
-  },
-  
-  tipIcon: {
-    fontSize: '2.5rem',
-    marginBottom: '1rem',
-    display: 'block',
-  },
-  
-  footer: {
-    background: 'linear-gradient(135deg, #6f42c1 0%, #5a3d8c 100%)',
-    color: '#ffffff',
-    padding: '2rem',
-    textAlign: 'center',
-  },
-  
-  footerText: {
-    fontSize: '1rem',
-    marginBottom: '1rem',
-  },
-  
-  emergencyNumbers: {
-    borderTop: '1px solid rgba(255,255,255,0.2)',
-    paddingTop: '1rem',
-    marginTop: '1rem',
-  },
-  
-  emergencyText: {
-    fontSize: '0.9rem',
-    opacity: 0.9,
-  },
-};
-
-export default StreeHome;
+export default StreeHome
 
