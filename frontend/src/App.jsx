@@ -277,7 +277,7 @@ const App = () => {
                 <AlertTriangle size={48} className="text-white" />
               </div>
               
-              <h2 className="text-4xl font-black mb-2 tracking-tight italic">SOS ACTIVE</h2>
+              <h2 className="text-4xl font-black mb-2 tracking-tight font-libre">SOS ACTIVE</h2>
               <div className="bg-black/20 px-4 py-1.5 rounded-full text-xs font-bold tracking-[0.2em] mb-8 uppercase">
                 {dispatchStatus === 'initiating' && "Establishing Link..."}
                 {dispatchStatus === 'transmitting' && "Transmitting Location..."}
@@ -414,8 +414,10 @@ const App = () => {
             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
           <h1 className="text-4xl font-black tracking-tighter font-libre">STREE</h1>
-          <div className={`h-1 w-8 rounded-full mt-1 ${darkMode ? 'bg-purple-500' : 'bg-purple-600'}`}></div>
-        </header>
+           <p className={`text-sm font-medium font-libre mt-1 opacity-60 ${darkMode ? 'text-purple-300' : 'text-purple-900'}`}>
+                  Hers For Her
+                </p>
+         </header>
 
         {/* Scrollable Content Area */}
         <div className="flex-grow overflow-y-auto hide-scrollbar flex flex-col relative">
@@ -423,10 +425,10 @@ const App = () => {
           {currentPage === 'home' && (
             <div className="flex-grow flex flex-col animate-in fade-in zoom-in-95 duration-500">
               <div className="px-8 mt-6 text-center">
-                <h3 className="text-xl font-bold tracking-tight">
+                <h3 className="text-xl font-bold tracking-tight font-libre">
                   Welcome{userProfile.name.trim() ? `, ${userProfile.name.split(' ')[0]}` : ''}
                 </h3>
-                <p className={`text-sm font-medium mt-1 opacity-60 ${darkMode ? 'text-purple-300' : 'text-purple-900'}`}>
+                <p className={`text-sm font-medium mt-1 font-libre opacity-60 ${darkMode ? 'text-purple-300' : 'text-purple-900'}`}>
                   You are in a safe space
                 </p>
               </div>
@@ -440,13 +442,13 @@ const App = () => {
                     className={`relative w-52 h-52 rounded-full flex flex-col items-center justify-center shadow-2xl transition-all duration-300 z-10 border-8 border-white/10 ${sosActive ? 'bg-red-600' : 'bg-gradient-to-br from-purple-600 to-indigo-700 active:scale-90 hover:shadow-purple-500/40'}`}
                   >
                     <AlertTriangle className={`w-12 h-12 text-white mb-2 ${sosActive ? 'animate-bounce' : ''}`} />
-                    <span className="text-5xl font-black text-white tracking-tighter">SOS</span>
+                    <span className="text-5xl font-black text-white tracking-tighter font-libre ">SOS</span>
                     <div className="mt-4 flex gap-2">
                       {[1, 2, 3].map(i => <div key={i} className={`h-2 rounded-full transition-all duration-300 ${tapCount >= i ? 'bg-white w-6' : 'bg-white/30 w-2'}`} />)}
                     </div>
                   </button>
                 </div>
-                <p className={`mt-10 text-[10px] uppercase font-bold tracking-[0.3em] ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Triple Tap for Emergency</p>
+                <p className={`mt-10 text-[10px] uppercase font-bold tracking-[0.3em] font-libre ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Triple Tap for Emergency</p>
               </div>
 
               <div className={`rounded-t-[3rem] p-8 space-y-4 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] ${darkMode ? 'bg-slate-950' : 'bg-white'}`}>
